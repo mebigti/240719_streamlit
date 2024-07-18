@@ -1,6 +1,8 @@
 import streamlit as st
 import openai
 from streamlit_chat import message
+import tempfile
+import speech_recognition as sr
 
 # OpenAI API 키 설정
 openai.api_key = 'OPENAI_API_KEY'
@@ -17,6 +19,24 @@ voice_recognition = st.sidebar.button("음성 인식")
 # 채팅 기록 초기화
 if 'messages' not in st.session_state:
     st.session_state['messages'] = []
+
+# 음성 인식 처리
+def transcribe_audio():
+    recognizer = sr.Recognizer()
+    audio_file = st.file_uploader("녹음된 음성을 업로드하세요", type=["wav"])
+    if audio_file:
+        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_audio_file:
+            temp_audio_file.write(audio_file.getvalue())
+            temp_audio_file_path = temp_audio_file.name
+
+        with sr.AudioFile(temp_audio_file_path) as source:
+            audio = recognizer.record(source)
+            try:
+                return recognizer.recognize_google(audio, language="ko-KR")
+            except sr.UnknownValueError:
+                return "음성을 인식할 수 없습니다."
+            except sr.RequestError as e:
+                return f"음성 인식 서비스 오류: {e}"
 
 # 사용자가 메시지를 입력하는 텍스트 상자
 user_input = st.text_input("당신의 메시지를 입력하세요", "")
@@ -43,11 +63,13 @@ for msg in st.session_state['messages']:
     else:
         message(msg['content'])
 
-# 멀티모달 입력과 음성 인식 기능 (여기서는 단순히 로그를 출력)
+# 멀티모달 입력과 음성 인식 기능
 if multimodal_input:
     st.write("멀티모달 입력 기능이 활성화되었습니다.")
 
 if voice_recognition:
     st.write("음성 인식 기능이 활성화되었습니다.")
+    audio_text = transcribe_audio()
+    st.text_area("음성 인식 결과", audio_text)
 
 # Run with: streamlit run this_script.py
