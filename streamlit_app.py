@@ -3,11 +3,11 @@ import openai
 from streamlit_chat import message
 
 # OpenAI API 키 설정
-openai.api_key = 'my-key'
+openai.api_key = 'YOUR_OPENAI_API_KEY'
 
 # 사이드 메뉴 구성
 st.sidebar.title("ChatGPT Interface")
-model_selection = st.sidebar.selectbox("모델 선택", ["gpt-3.5-turbo", "davinci"])
+model_selection = st.sidebar.selectbox("모델 선택", ["gpt-3.5-turbo", "text-davinci-003"])
 candidate_prompts = st.sidebar.text_area("후보 프롬프트", "예시 프롬프트를 입력하세요")
 
 # 멀티모달 입력 버튼과 음성 인식 버튼
@@ -26,19 +26,22 @@ if st.button("보내기"):
     if user_input:
         st.session_state['messages'].append({"role": "user", "content": user_input})
         # OpenAI API 호출
-        response = openai.ChatCompletion.create(
-            model=model_selection,
-            messages=st.session_state['messages']
-        )
-        # 모델 응답 저장
-        st.session_state['messages'].append({"role": "assistant", "content": response.choices[0].message['content']})
+        try:
+            response = openai.ChatCompletion.create(
+                model=model_selection,
+                messages=[{"role": m["role"], "content": m["content"]} for m in st.session_state['messages']]
+            )
+            # 모델 응답 저장
+            st.session_state['messages'].append({"role": "assistant", "content": response.choices[0].message['content']})
+        except openai.error.OpenAIError as e:
+            st.error(f"Error: {e}")
 
 # 채팅 기록 표시
-for message in st.session_state['messages']:
-    if message['role'] == 'user':
-        message(message['content'], is_user=True)
+for msg in st.session_state['messages']:
+    if msg['role'] == 'user':
+        message(msg['content'], is_user=True)
     else:
-        message(message['content'])
+        message(msg['content'])
 
 # 멀티모달 입력과 음성 인식 기능 (여기서는 단순히 로그를 출력)
 if multimodal_input:
