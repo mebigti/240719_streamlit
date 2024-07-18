@@ -3,7 +3,7 @@ import openai
 from streamlit_chat import message
 
 # OpenAI API 키 설정
-openai.api_key = 'YOUR_OPENAI_API_KEY'
+openai.api_key = 'my-key'
 
 # 사이드 메뉴 구성
 st.sidebar.title("ChatGPT Interface")
