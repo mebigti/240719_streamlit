@@ -9,7 +9,7 @@ api_key = st.sidebar.text_input('OpenAI API Key', type='password')
 st.sidebar.header('모델 선택')
 model = st.sidebar.selectbox(
     'OpenAI 모델을 선택하세요',
-    ['gpt-4', 'gpt-4-turbo', 'gpt-4o', 'gpt-3-turbo']
+    ['gpt-4', 'gpt-4-turbo', 'gpt-4o', 'gpt-3.5-turbo']
 )
 
 # API 키가 입력되었는지 확인
@@ -22,14 +22,17 @@ if api_key:
 
     if user_input:
         # OpenAI API를 사용하여 응답 생성
-        response = openai.Completion.create(
-            engine=model,
-            prompt=user_input,
+        response = openai.ChatCompletion.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": user_input}
+            ],
             max_tokens=4000
         )
 
         # 응답 출력
-        st.write('챗봇:', response.choices[0].text.strip())
+        st.write('챗봇:', response.choices[0].message['content'].strip())
 else:
     st.write('API Key를 사이드바에 입력하세요.')
 
