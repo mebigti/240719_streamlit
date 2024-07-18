@@ -3,7 +3,7 @@ import openai
 from streamlit_chat import message
 
 # OpenAI API 키 설정
-openai.api_key = 'YOUR_OPENAI_API_KEY'
+openai.api_key = 'OPENAI_API_KEY'
 
 # 사이드 메뉴 구성
 st.sidebar.title("ChatGPT Interface")
@@ -33,7 +33,7 @@ if st.button("보내기"):
             )
             # 모델 응답 저장
             st.session_state['messages'].append({"role": "assistant", "content": response.choices[0].message['content']})
-        except openai.error.OpenAIError as e:
+        except Exception as e:
             st.error(f"Error: {e}")
 
 # 채팅 기록 표시
